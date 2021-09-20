@@ -1,0 +1,126 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using DG.Tweening;
+
+public class SwipeDetector : MonoBehaviour
+{
+	private Vector2 fingerDownPos;
+	private Vector2 fingerUpPos;
+	private Transform playerBody;
+
+	public bool detectSwipeAfterRelease = false;
+
+	public float SWIPE_THRESHOLD = 20f;
+
+	private void Start()
+	{
+		playerBody = transform.GetChild(0);
+	}
+
+	void Update ()
+	{
+
+		foreach (Touch touch in Input.touches) {
+			if (touch.phase == TouchPhase.Began) {
+				fingerUpPos = touch.position;
+				fingerDownPos = touch.position;
+			}
+
+			//Detects Swipe while finger is still moving on screen
+			if (touch.phase == TouchPhase.Moved) {
+				if (!detectSwipeAfterRelease) {
+					fingerDownPos = touch.position;
+					DetectSwipe ();
+				}
+			}
+
+			//Detects swipe after finger is released from screen
+			if (touch.phase == TouchPhase.Ended) {
+				fingerDownPos = touch.position;
+				DetectSwipe ();
+			}
+		}
+		
+		if (Input.GetMouseButtonUp(0))
+		{
+			ResetRotation();
+		}
+	}
+
+	void DetectSwipe ()
+	{
+		
+		if (VerticalMoveValue () > SWIPE_THRESHOLD && VerticalMoveValue () > HorizontalMoveValue ()) {
+			//Debug.Log ("Vertical Swipe Detected!");
+			if (fingerDownPos.y - fingerUpPos.y > 0) {
+				OnSwipeUp ();
+			} else if (fingerDownPos.y - fingerUpPos.y < 0) {
+				OnSwipeDown ();
+			}
+			fingerUpPos = fingerDownPos;
+
+		} else if (HorizontalMoveValue () > SWIPE_THRESHOLD && HorizontalMoveValue () > VerticalMoveValue ()) {
+			//Debug.Log ("Horizontal Swipe Detected!");
+			if (fingerDownPos.x - fingerUpPos.x > 0) {
+				OnSwipeRight ();
+			} else if (fingerDownPos.x - fingerUpPos.x < 0) {
+				OnSwipeLeft ();
+			}
+			fingerUpPos = fingerDownPos;
+
+		} else {
+			//Debug.Log ("No Swipe Detected!");
+		}
+	}
+
+	float VerticalMoveValue ()
+	{
+		return Mathf.Abs (fingerDownPos.y - fingerUpPos.y);
+	}
+
+	float HorizontalMoveValue ()
+	{
+		return Mathf.Abs (fingerDownPos.x - fingerUpPos.x);
+	}
+
+	void OnSwipeUp ()
+	{	
+		//Do something when swiped up
+	}
+
+	void OnSwipeDown ()
+	{
+		//Do something when swiped down
+	}
+
+	void OnSwipeLeft ()
+	{
+		Vector3 targetRot = new Vector3(0, -45, 0);
+		playerBody.DORotate(targetRot, .3f, RotateMode.Fast);
+		if (Quaternion.Angle(playerBody.rotation, Quaternion.Euler(targetRot)) < 25)
+		{
+			//isTapped = true;
+			ResetRotation();
+		}
+	}
+
+	void OnSwipeRight ()
+	{
+		Vector3 targetRot = new Vector3(0, 45, 0);
+		playerBody.DORotate(targetRot, .3f, RotateMode.Fast);
+		if (Quaternion.Angle(playerBody.rotation, Quaternion.Euler(targetRot)) < 25)
+		{
+			//isTapped = true;
+			ResetRotation();
+		}
+	}
+	
+	void ResetRotation()
+	{
+		Vector3 baseRot = new Vector3(0, 0, 0);
+		playerBody.DORotate(baseRot, .3f, RotateMode.Fast);  
+	}
+}

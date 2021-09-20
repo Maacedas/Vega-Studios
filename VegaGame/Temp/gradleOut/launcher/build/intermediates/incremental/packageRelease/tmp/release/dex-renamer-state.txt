@@ -1,0 +1,4 @@
+#Mon Sep 20 22:17:07 EET 2021
+base.0=D\:\\VegaGames\\VegaGame\\Temp\\gradleOut\\launcher\\build\\intermediates\\transforms\\dexMerger\\release\\0
+path.0=classes.dex
+renamed.0=classes.dex
